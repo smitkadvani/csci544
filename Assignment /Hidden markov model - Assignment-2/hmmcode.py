@@ -12,10 +12,11 @@ def readModeData():
 
 def parseSentence(sentence): 
     sentence = sentence.split(" ")
-    viterbi_mat = {}
+    viterbi_mat = []
+    backpointer = []
     for __ in sentence:
         viterbi_mat.append(dict()) 
-    backpointer = [dict()]
+        backpointer.append(dict())
     prev = "BEG"
     initial_word  = sentence[0]
     for index_of, state in enumerate(tags_list):
@@ -40,20 +41,21 @@ def parseSentence(sentence):
                     wordTotag = Tunning_parameter
                 if value + tagTotag + wordTotag > temporary_value:
                     temporary_value = value+tagTotag+wordTotag
-                    probable_tag = value     
-            print(word_index)       
+                    probable_tag = prev_state_     
             viterbi_mat[word_index][state] = temporary_value
             backpointer[word_index][state] = probable_tag
-    
+        
     bestpathprob = [float('-inf') for _ in range(len(sentence)+1)]
     bestpathtag = [0 for _ in range(len(sentence)+1)]
-    for word_index in range(len(viterbi_mat)):
+    word_index = len(sentence)-1
+    while word_index > 0:
         max_prob = float('-inf')
-        
-        for tag, tag_value in enumerate(viterbi_mat[word_index].items()):
+        for tag, tag_value in viterbi_mat[word_index].items():
             if tag_value > max_prob:
                 max_prob = tag_value
                 bestpathtag[word_index] = backpointer[word_index][tag]
+        word_index -= 1
+               
     
     for index, word in enumerate(sentence):
         sentence[index] = sentence[index] + "/" + tags_list[bestpathtag[index]]
