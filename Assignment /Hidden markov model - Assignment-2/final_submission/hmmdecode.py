@@ -15,12 +15,7 @@ def viterbi(sent, mymod, prob_ttt, prob_wt, prob_tag, end_w):
 	vit_param = [defaultdict(int)]
 	back_p = [defaultdict(int)]
 	
-
-
-
-	for curr_tag in prob_wt[w] if w in prob_wt else prob_ttt:
-		
-		 
+	for curr_tag in prob_wt[w] if w in prob_wt else prob_ttt: 
 		if curr_tag in pi:
 			vit_param[0][curr_tag] += log(pi[curr_tag])
 		else:
@@ -38,26 +33,19 @@ def viterbi(sent, mymod, prob_ttt, prob_wt, prob_tag, end_w):
 		vit_param.append(defaultdict(int))
 		w = words[i]
 		back_p.append(defaultdict(int))
-
 		for curr_tag in prob_wt[w] if w in prob_wt else prob_ttt:
 			vit_param[i][curr_tag] = -float('inf')
-
 			for p_tag in vit_param[i-1]:
 				prob = vit_param[i-1][p_tag]
 
-				 
 				if (p_tag in prob_ttt and curr_tag in prob_ttt[p_tag]):
 					prob += log(prob_ttt[p_tag][curr_tag])
 				else: 
 					prob += smooth
-				 
-
 				if w in prob_wt:
 					prob += log(prob_wt[w][curr_tag])
 				else: 
 					prob += log(prob_tag[curr_tag])
-
-
 				if vit_param[i][curr_tag] < prob:
 					vit_param[i][curr_tag] = prob
 					back_p[i][curr_tag] = p_tag
@@ -87,13 +75,12 @@ def dec_pos(path, mymod, prob_ttt, prob_wt, prob_tag, end_w):
 			if line:
 				out.write(line + '\n')
 
-
 with open('hmmmodel.txt') as mod:
 	mymod = json.load(mod)
-	prob_wt = mymod['PWT']
-	prob_tag = mymod['PT']
-	end_w = mymod['ENDS']
-	prob_ttt = mymod['PTT']
+	prob_wt = mymod['Prob_word_tag']
+	prob_tag = mymod['Prob_tag']
+	end_w = mymod['End_of_sentence']
+	prob_ttt = mymod['Prob_tag_to_tag']
 	
 cmd_para = sys.argv[1]
 dec_pos(cmd_para, mymod, prob_ttt, prob_wt, prob_tag, end_w)   

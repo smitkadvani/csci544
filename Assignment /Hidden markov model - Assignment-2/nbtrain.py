@@ -8,32 +8,36 @@ total_word = []
 lam = 1
 
 
-def read_file_recursively(root_dir):
-    for filename in glob.iglob(root_dir + '/' + '**/*isdt_train_tagged.txt', recursive=True):  
-        test_file_content = read_text_file(filename)
-        for sentence in test_file_content.split("\n"):
-            parseSentence(sentence)
-        tags_index = (list(tag_dict.keys()))
-        tags_index.append("BEG")
-        for tag in tags_index : 
-            transitionMatrix[tag]={}
-            transitionSum[tag] = 1
-            for tag1 in tags_index:
-                transitionMatrix[tag][tag1] = lam
-        for tag in tags_index:
-            emissionMatrix[tag] = {}
-            emissionSum[tag] = 1
-            for word in total_word:
-                emissionMatrix[tag][word] = 1
-        for sentence in test_file_content.split("\n"):
-            parseSentenceEmission(sentence)
-    return tags_index
-     
-def read_text_file(file_path):
-    file_content = ""
-    with open(file_path, 'r') as f:
-        file_content += f.read()
-    return file_content
+class Hidden_Markov_Mode:
+    #Following variables are model parameters 
+    def __init__():
+        self.tag_dict=defaultdict(int)
+        self.tags_index=[]
+        self.transitionSum = {}
+        self.emissionSum = {}
+        self.transitionMatrix = defaultdict(lambda : defaultdict(int))
+        self.emissionMatrix = defaultdict(lambda : defaultdict(int))
+    def read_file_recursively(root_dir):
+        for filename in glob.iglob(root_dir , recursive=True):  
+            test_file_content = read_text_file(filename)
+            for sentence in test_file_content.split("\n"):
+                prev_tag = "BGNING"
+                for word,tag in map(lambda x : (x[:x.rfind('/')], x[x.rfind('/')+1:] ,sentence.rstrip().split(' ') + 'END\END'):
+                    self.tag_dict[tag] += 1
+                    self.transitionMatrix[prev][tag] += 1
+                    self.emissionMatrix[prev][tag] += 1
+                    self.transitionSum[tag] += 1
+                    self.emissionSum[tag] += 1
+                    prev_tag = tag
+            for sentence in test_file_content.split("\n"):
+                parseSentenceEmission(sentence)
+        return tags_inde
+        
+    def read_text_file(file_path):
+        file_content = ""
+        with open(file_path, encoding='utf-8') as f:
+            file_content += f.read()
+        return file_content
 
 def parseSentence(sentence):
     sentence = sentence.split(" ")
