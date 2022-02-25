@@ -26,6 +26,7 @@ def parseSentence(sentence):
         else:
             wordTotag = Tunning_parameter
         viterbi_mat[0][state] = tagTotag + wordTotag
+        backpointer[0][state] = 0
     
     for word_index, word in enumerate(sentence):
         if word_index == 0:
@@ -44,21 +45,61 @@ def parseSentence(sentence):
                     probable_tag = prev_state_     
             viterbi_mat[word_index][state] = temporary_value
             backpointer[word_index][state] = probable_tag
-        
-    bestpathprob = [float('-inf') for _ in range(len(sentence)+1)]
-    bestpathtag = [0 for _ in range(len(sentence)+1)]
-    word_index = len(sentence)-1
-    while word_index > 0:
-        max_prob = float('-inf')
-        for tag, tag_value in viterbi_mat[word_index].items():
-            if tag_value > max_prob:
-                max_prob = tag_value
-                bestpathtag[word_index] = backpointer[word_index][tag]
-        word_index -= 1
-               
     
+    bestpathprob = [float('-inf') for _ in sentence]
+
+    final_state = max(viterbi_mat[-1], key=viterbi_mat[-1].get)
+
+    bestpathtag = []
+    
+    for i in range(len(sentence)-1, -1, -1):
+        bestpathtag.append(final_state)
+        final_state = backpointer[i][final_state]
+    
+    bestpathtag = bestpathtag[::-1]
+    # bestpathtag = [defaultTag for _ in sentence]
+    # max_temp = float('-inf')
+    # max_temp_tag = defaultTag
+    # for word_index in range(len(sentence)):
+    #     for tag in tags_list:
+    #         if viterbi_mat[word_index][tag] > max_temp:
+    #             max_temp = viterbi_mat[word_index][tag]
+    #             max_temp_tag = tag
+    #     bestpathprob[word_index] = max_temp
+    #     bestpathtag[word_index] = max_temp_tag
+    print(bestpathtag)
+    
+
+
+        
+    # tag = []
+    # current_tag = defaultTag
+    # word_index = len(sentence) - 1
+    # max_val = float('-inf')
+    # for tag, value in viterbi_mat[word_index].items():
+    #     if max_val < value:
+    #         max_val = value
+    #         current_tag = tag
+    # tag.append(current_tag)
+    # word_index -= 1
+    # while word_index > 0:
+
+
+    # bestpathprob = [float('-inf') for _ in range(len(sentence)+1)]
+    # bestpathtag = [0 for _ in range(len(sentence)+1)]
+    # word_index = len(sentence)-1
+    # while word_index > 0:
+    #     max_prob = float('-inf')
+    #     for tag, tag_value in viterbi_mat[word_index].items():
+    #         if tag_value > max_prob:
+    #             max_prob = tag_value
+    #             bestpathprob[word_index] = max_prob
+    #             bestpathtag[word_index] = backpointer[word_index][tag]
+    #     word_index -= 1
+               
+    # print(bestpathtag)
     for index, word in enumerate(sentence):
-        sentence[index] = sentence[index] + "/" + tags_list[bestpathtag[index]]
+        sentence[index] = sentence[index] + "/" + bestpathtag[index]
     return " ".join(sentence)
 
 def read_text_file(file_path):
