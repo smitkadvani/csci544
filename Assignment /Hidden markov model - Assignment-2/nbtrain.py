@@ -25,10 +25,8 @@ def read_file_recursively(root_dir):
             emissionSum[tag] = 0
             for word in total_word:
                 emissionMatrix[tag][word] = 1
-        
         for sentence in test_file_content.split("\n"):
-            parseSentenceEmission(sentence,tags_index,transitionMatrix,emissionMatrix)
-    return [transitionMatrix,emissionMatrix,tags_index]
+            parseSentenceEmission(sentence)
      
 def read_text_file(file_path):
     file_content = ""
@@ -48,11 +46,12 @@ def parseSentence(sentence):
         if word not in total_word:
             total_word.append(word)
         if tag not in tag_dict:
-            tag_dict[tag]=1
+            tag_dict[tag]=1.0
         else:
-            tag_dict[tag]+=1
+            tag_dict[tag]+=1.0
 
-def parseSentenceEmission(sentence,tags_index,transitionMatrix,emissionMatrix):
+
+def parseSentenceEmission(sentence):
     sentence = sentence.split(" ")
     prev_tag = "BEG"
     for tagged_word in sentence:
@@ -62,19 +61,11 @@ def parseSentenceEmission(sentence,tags_index,transitionMatrix,emissionMatrix):
         word,tag = word[::-1],tag[::-1]
         if word.isdigit():
             word="0"
-        transitionMatrix[prev_tag][tag] += 1
-        transitionSum[prev_tag]+=1
-        emissionMatrix[tag][word] += 1
-        emissionSum[tag]+=1
+        transitionMatrix[prev_tag][tag] += 1.0
+        transitionSum[prev_tag]+=1.0
+        emissionMatrix[tag][word] += 1.0
+        emissionSum[tag]+=1.0
         prev_tag = tag
-
-def countToProb(trasition_mat):
-    for row_index, row in enumerate(trasition_mat):
-        for index,cell in enumerate(row):
-            trasition_mat[row_index][index]/=total
-            trasition_mat[row_index][index] = math.log(trasition_mat[row_index][index],2.7)
-            trasition_mat[row_index][index] = "{:.6f}".format(trasition_mat[row_index][index])
-    return trasition_mat
 
 if __name__ == "__main__":
     #path = sys.argv[1]
@@ -86,20 +77,22 @@ if __name__ == "__main__":
     emissionMatrix = dict()
     BEG_OF_SENTENCE="__"
     path = './hmm-training-data'
-    trasition_mat,emission_mat,tags_list = read_file_recursively(path)
-    for tag in tags_index : 
-        transitionMatrix[tag]={}
-        transitionSum[tag] = 0
-        for tag1 in tags_index:
-            transitionMatrix[tag][tag1] /= transitionSum[tag]
-        emissionMatrix = dict()
-        for tag in tags_index:
-            emissionMatrix[tag] = {}
-            emissionSum[tag] = 0
-            for word in total_word:
-                emissionMatrix[tag][word] /= emissionSum[tag]
-    tag_dict = dict(sorted(tag_dict.items(), key=lambda item: item[1]))
-    model_parameter = {'tags_list':tags_list,'word_list':total_word,'transition_table':transitionMatrix,'emission_table':emissionMatrix,'tag_dict':tag_dict}
+    read_file_recursively(path)
+    
+    # for tag in tags_index : 
+    #     #transitionMatrix[tag]={}
+    #     #transitionSum[tag] = 0
+    #     for tag1 in tags_index:
+    #         transitionMatrix[tag][tag1] /= (transitionSum[tag] + len(tag_index))
+    #         transitionMatrix[tag][tag1] = math.log(transitionMatrix[tag][tag1])
+    # for tag in tags_index:
+    #         #emissionMatrix[tag] = {}
+    #         #semissionSum[tag] = 0
+    #     for word in total_word:
+    #         emissionMatrix[tag][word] /= (emissionSum[tag] + len(tag_index))
+    #         emissionMatrix[tag][word] = math.log(emissionMatrix[tag][word])
+    # tag_dict = dict(sorted(tag_dict.items(), key=lambda item: item[1]))
+    model_parameter = {'tags_list':tags_index,'word_list':total_word,'transition_table':transitionMatrix,'emission_table':emissionMatrix,'tag_dict':tag_dict}
     with open('hmmmodel.txt', 'w') as outfile:
         json.dump(model_parameter,outfile)
 
