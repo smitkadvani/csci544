@@ -17,16 +17,17 @@ def read_file_recursively(root_dir):
         tags_index.append("BEG")
         for tag in tags_index : 
             transitionMatrix[tag]={}
-            transitionSum[tag] = 0
+            transitionSum[tag] = 1
             for tag1 in tags_index:
                 transitionMatrix[tag][tag1] = lam
         for tag in tags_index:
             emissionMatrix[tag] = {}
-            emissionSum[tag] = 0
+            emissionSum[tag] = 1
             for word in total_word:
                 emissionMatrix[tag][word] = 1
         for sentence in test_file_content.split("\n"):
             parseSentenceEmission(sentence)
+    return tags_index
      
 def read_text_file(file_path):
     file_content = ""
@@ -77,21 +78,19 @@ if __name__ == "__main__":
     emissionMatrix = dict()
     BEG_OF_SENTENCE="__"
     path = './hmm-training-data'
-    read_file_recursively(path)
+    tags_index  = read_file_recursively(path)
     
-    # for tag in tags_index : 
-    #     #transitionMatrix[tag]={}
-    #     #transitionSum[tag] = 0
-    #     for tag1 in tags_index:
-    #         transitionMatrix[tag][tag1] /= (transitionSum[tag] + len(tag_index))
-    #         transitionMatrix[tag][tag1] = math.log(transitionMatrix[tag][tag1])
-    # for tag in tags_index:
-    #         #emissionMatrix[tag] = {}
-    #         #semissionSum[tag] = 0
-    #     for word in total_word:
-    #         emissionMatrix[tag][word] /= (emissionSum[tag] + len(tag_index))
-    #         emissionMatrix[tag][word] = math.log(emissionMatrix[tag][word])
-    # tag_dict = dict(sorted(tag_dict.items(), key=lambda item: item[1]))
+    for tag in tags_index : 
+        for tag1 in tags_index:
+            transitionMatrix[tag][tag1] /= (transitionSum[tag])
+            transitionMatrix[tag][tag1] = math.log(transitionMatrix[tag][tag1],2.7)
+    for tag in tags_index:
+        for word in total_word:
+            emissionMatrix[tag][word] /= (emissionSum[tag])
+            emissionMatrix[tag][word] = math.log(emissionMatrix[tag][word],2.7)
+   
+
+    tag_dict = dict(sorted(tag_dict.items(), key=lambda item: item[1]))
     model_parameter = {'tags_list':tags_index,'word_list':total_word,'transition_table':transitionMatrix,'emission_table':emissionMatrix,'tag_dict':tag_dict}
     with open('hmmmodel.txt', 'w') as outfile:
         json.dump(model_parameter,outfile)

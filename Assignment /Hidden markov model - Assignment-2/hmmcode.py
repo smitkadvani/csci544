@@ -3,7 +3,7 @@ import json
 #{'tags_list':tags_list,'word_list':total_word,
 #'transition_table':tranmision_prob,
 #'emission_table':emission_prob}
-Tunning_parameter = -7
+Tunning_parameter = -7.0
 def readModeData():
     file_path = './hmmmodel.txt'
     with open(file_path) as json_file:
@@ -13,8 +13,8 @@ def readModeData():
 def parseSentence(sentence): 
     sentence = sentence.split(" ")
     viterbi_mat = {}
-    for 
-    viterbi_mat=[dict()] 
+    for __ in sentence:
+        viterbi_mat.append(dict()) 
     backpointer = [dict()]
     prev = "BEG"
     initial_word  = sentence[0]
@@ -27,32 +27,33 @@ def parseSentence(sentence):
         viterbi_mat[0][state] = tagTotag + wordTotag
     
     for word_index, word in enumerate(sentence):
-        word = word.lower()
         if word_index == 0:
             continue
         temporary_value = float('-inf')
         probable_tag = defaultTag
         for index_of_tag, state in enumerate(tags_list):
-            for prev_state_index, value in enumerate(viterbi_mat[word_index-1]):
-                tagTotag = float(transition_table_tagTotag[prev_state_index][index_of_tag])
+            for prev_state_, value in (viterbi_mat[word_index-1].items()):
+                tagTotag = float(transition_table_tagTotag[prev_state_][state])
                 if word in word_list:
-                    wordTotag = float(emission_table_wordTotag[index_of_tag][word])
+                    wordTotag = float(emission_table_wordTotag[state][word])
                 else:
                     wordTotag = Tunning_parameter
-                if value+tagTotag+wordTotag > temporary_value:
+                if value + tagTotag + wordTotag > temporary_value:
                     temporary_value = value+tagTotag+wordTotag
-                    probable_tag = prev_state_index            
-            viterbi_mat[word_index][index_of_tag] = temporary_value
-            backpointer[word_index][index_of_tag] = probable_tag
+                    probable_tag = value     
+            print(word_index)       
+            viterbi_mat[word_index][state] = temporary_value
+            backpointer[word_index][state] = probable_tag
     
     bestpathprob = [float('-inf') for _ in range(len(sentence)+1)]
     bestpathtag = [0 for _ in range(len(sentence)+1)]
     for word_index in range(len(viterbi_mat)):
         max_prob = float('-inf')
-        for tag_index, tag_value in enumerate(viterbi_mat[word_index]):
+        
+        for tag, tag_value in enumerate(viterbi_mat[word_index].items()):
             if tag_value > max_prob:
                 max_prob = tag_value
-                bestpathtag[word_index] = backpointer[word_index][tag_index]
+                bestpathtag[word_index] = backpointer[word_index][tag]
     
     for index, word in enumerate(sentence):
         sentence[index] = sentence[index] + "/" + tags_list[bestpathtag[index]]
